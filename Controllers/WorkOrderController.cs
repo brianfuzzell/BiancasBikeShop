@@ -33,12 +33,69 @@ public class WorkOrderController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
+    //[Authorize]
     public IActionResult CreateWorkOrder(WorkOrder workOrder)
     {
         workOrder.DateInitiated = DateTime.Now;
         _dbContext.WorkOrders.Add(workOrder);
         _dbContext.SaveChanges();
         return Created($"/api/workorder/{workOrder.Id}", workOrder);
+    }
+
+    [HttpPut("{id}")]
+    [Authorize]
+    public IActionResult UpdateWorkOrder(WorkOrder workOrder, int id)
+    {
+        WorkOrder workOrderToUpdate = _dbContext.WorkOrders.SingleOrDefault(wo => wo.Id == id);
+        if (workOrderToUpdate == null)
+        {
+            return NotFound();
+        }
+        else if (id != workOrder.Id)
+        {
+            return BadRequest();
+        }
+
+        //These are the only properties that we want to make editable
+        workOrderToUpdate.Description = workOrder.Description;
+        workOrderToUpdate.UserProfileId = workOrder.UserProfileId;
+        workOrderToUpdate.BikeId = workOrder.BikeId;
+
+        _dbContext.SaveChanges();
+
+        return NoContent();
+    }
+
+    [HttpPut("{id}/complete")]
+    [Authorize]
+    public IActionResult CompleteWorkOrder(int id)
+    {
+        WorkOrder workOrderToComplete = _dbContext.WorkOrders.SingleOrDefault(wo => wo.Id == id);
+        if (workOrderToComplete == null)
+        {
+            return NotFound();
+        }
+
+        workOrderToComplete.DateCompleted = DateTime.Now;
+
+        _dbContext.SaveChanges();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}/delete")]
+    [Authorize]
+    public IActionResult DeleteWorkOrder(int id)
+    {
+        WorkOrder workOrderToDelete = _dbContext.WorkOrders.SingleOrDefault(wo => wo.Id == id);
+        if (workOrderToDelete == null)
+        {
+            return NotFound();
+        }
+
+        _dbContext.Remove(workOrderToDelete);
+        _dbContext.SaveChanges();
+
+        return NoContent();
     }
 }
