@@ -12,6 +12,7 @@ export default function BikeList({ setDetailsBikeId }) {
   useEffect(() => {
     getAllBikes();
   }, []);
+  
   return (
     <>
       <h2>Bikes</h2>
